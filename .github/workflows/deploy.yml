@@ -1,0 +1,42 @@
+name: Pro Vibe Pipeline
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Auth to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/986836649818/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+          service_account: 'github-antigravity@gcp-hk-sandbox.iam.gserviceaccount.com'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker Auth
+        run: gcloud auth configure-docker asia-east1-docker.pkg.dev
+
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_TAG="asia-east1-docker.pkg.dev/gcp-hk-sandbox/antigravity-vibe-repo/vibe-app:${{ github.sha }}"
+          docker build -t $IMAGE_TAG .
+          docker push $IMAGE_TAG
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init and Apply
+        working-directory: ./terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve
