@@ -44,3 +44,21 @@ resource "google_cloud_run_v2_service_iam_member" "public" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+resource "google_cloud_run_v2_service" "vibe_app" {
+  name     = "antigravity-app"
+  location = "asia-east1"
+  ingress  = "INGRESS_TRAFFIC_ALL"
+
+  # 加入呢一行嚟解鎖刪除權限
+  deletion_protection = false 
+
+  template {
+    containers {
+      image = "asia-east1-docker.pkg.dev/gcp-hk-sandbox/antigravity-vibe-repo/vibe-app:${var.image_tag}"
+      env {
+        name  = "BUCKET_NAME"
+        value = google_storage_bucket.vibe_uploads.name
+      }
+    }
+  }
+}
