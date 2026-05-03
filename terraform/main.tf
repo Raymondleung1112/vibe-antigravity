@@ -15,7 +15,6 @@ provider "google" {
   region  = "asia-east1"
 }
 
-# 1. 建立 GCS Bucket
 resource "google_storage_bucket" "vibe_uploads" {
   name                        = "vibe-uploads-986836649818"
   location                    = "ASIA-EAST1"
@@ -23,13 +22,12 @@ resource "google_storage_bucket" "vibe_uploads" {
   uniform_bucket_level_access = true
 }
 
-# 2. 定義 Cloud Run 服務
 resource "google_cloud_run_v2_service" "vibe_app" {
   name     = "antigravity-app"
   location = "asia-east1"
   ingress  = "INGRESS_TRAFFIC_ALL"
 
-  # 關鍵：解決之前 "Error waiting to destroy" 嘅問題
+  # 必須維持 false 直到部署成功
   deletion_protection = false 
 
   template {
@@ -43,7 +41,6 @@ resource "google_cloud_run_v2_service" "vibe_app" {
   }
 }
 
-# 3. 授權公眾存取
 resource "google_cloud_run_v2_service_iam_member" "public" {
   location = google_cloud_run_v2_service.vibe_app.location
   name     = google_cloud_run_v2_service.vibe_app.name

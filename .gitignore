@@ -1,0 +1,17 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Lock files (let CI use npm install fresh)
+package-lock.json
+
+# OS
+.DS_Store
+
+# Terraform local state/cache (remote backend is GCS)
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
